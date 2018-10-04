@@ -9,10 +9,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Net;
-using System.IO;
 using System.Net.Http;
-using System.Diagnostics;
-
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GovQAUpdate
 {
@@ -22,13 +22,16 @@ namespace GovQAUpdate
     public const int GovQAUpdate_application_staff_id = 1;
 
     public static void Main()
-    { 
-      
+    {
+      var token = new AccessToken();
+      var i =  GetJSONAsync(token.GetLoginURL(), token.Headers);
+      var records = new GovQARecord();
+
 
       // TODO: write program
 
       // While (ProgramShouldBeRunning)
-      //{
+      // {
 
 
         // try
@@ -50,41 +53,83 @@ namespace GovQAUpdate
         // {
             // write error 
         // }
-      //}
+      // }
     }
 
-    public static string GetJSON(string url, WebHeaderCollection hc = null)
+    public static Task<string> GetJSONAsync(string url, WebHeaderCollection hc = null)
     {
-      var hcr = new HttpClient();
-      
-      ServicePointManager.ReusePort = true;
-      ServicePointManager.Expect100Continue = true;
-      ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-      var wr = HttpWebRequest.Create(url);
-      wr.Timeout = 40000;
-      wr.Proxy = null;
-      wr.ContentType = "application/json";
-      if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
-      {
-        foreach (string key in hc.AllKeys)
-        {
-          wr.Headers.Add(key, hc[key]);
-        }
-      }
+
+
+      //ServicePointManager.ReusePort = true;
+      //ServicePointManager.Expect100Continue = true;
+      //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+      //var wr = HttpWebRequest.Create(url);
+      //wr.Timeout = 40000;
+      //wr.Proxy = null;
+      //wr.ContentType = "application/json";
+      //if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+      //{
+      //  foreach (string key in hc.AllKeys)
+      //  {
+      //    wr.Headers.Add(key, hc[key]);
+      //  }
+      //}
+
+      // TODO: get content-type application/json and accept application/json headers get added
       string json = "";
+
       try
       {
-        using (var response = wr.GetResponse())
+
+        using (var client = new HttpClient())
         {
-          if (response != null)
+          var request = new HttpRequestMessage()
           {
-            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            RequestUri = new Uri(url),
+            Method = HttpMethod.Post,
+          };
+          if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+          {
+            
+            foreach (string key in hc.AllKeys)
             {
-              json = sr.ReadToEnd();
-              return json;
+              request.Headers.Add(key, hc[key] + ",");
             }
           }
-        }
+
+          var task = client.SendAsync(request)
+              .ContinueWith((taskwithmsg) =>
+              {
+                var response = taskwithmsg.Result;
+
+                var jsonTask = response.Content.ReadAsStreamAsync();
+                jsonTask.Wait();
+                var jsonObject = jsonTask.Result;
+              });
+        };
+        //using (HttpClient client = new HttpClient())
+        //{
+        //  if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+        //  {
+        //    foreach (string key in hc.AllKeys)
+        //    {
+        //      wr.Headers.Add(key, hc[key]);
+        //    }
+        //  };
+        //  // TODO: add headers to HttpClient without using HttpClient.DefaultRequestHeaders
+        // HttpResponseMessage response = await client.SendAsync(wr);
+        // HttpContent content = response.Content;
+        //  {
+        //    if (response != null)
+        //    {
+        //      using (StreamReader sr = new StreamReader(await content.ReadAsStringAsync()))
+        //      {
+        //        json = sr.ReadToEnd();
+        //        return json;
+        //      }
+        //    }
+        //  }
+
         return null;
       }
       catch (Exception ex)
@@ -93,9 +138,6 @@ namespace GovQAUpdate
         return null;
       }
     }
-
-
-
 
     //public enum CS_Type : int
     //{

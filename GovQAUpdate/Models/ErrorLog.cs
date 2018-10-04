@@ -51,10 +51,10 @@ namespace GovQAUpdate
           VALUES (@applicationName, @errorText, @errorMessage,
             @errorStacktrace, @errorSource, @query);";
 
-      using (IDbConnection db = new SqlConnection())
-      {
-        db.Execute(sql, this);
-      }
+      //using (IDbConnection db = new SqlConnection())
+      //{
+      //  db.Execute(sql, this);
+      //}
     }
 
     public static void SaveEmail(string to, string subject, string body)
@@ -64,23 +64,23 @@ namespace GovQAUpdate
           (EmailTo, EmailSubject, EmailBody)  
           VALUES (@To, @Subject, @Body);";
 
-      try
-      {
-        var dbArgs = new Dapper.DynamicParameters();
-        dbArgs.Add("@To", to);
-        dbArgs.Add("@Subject", subject);
-        dbArgs.Add("@Body", body);
+      //try
+      //{
+      //  var dbArgs = new Dapper.DynamicParameters();
+      //  dbArgs.Add("@To", to);
+      //  dbArgs.Add("@Subject", subject);
+      //  dbArgs.Add("@Body", body);
 
 
-        using (IDbConnection db = new SqlConnection())
-        {
-          db.Execute(sql, dbArgs);
-        }
-      }
-      catch (Exception ex)
-      {
-        new ErrorLog(ex, sql);
-      }
+      //  using (IDbConnection db = new SqlConnection())
+      //  {
+      //    db.Execute(sql, dbArgs);
+      //  }
+      //}
+      //catch (Exception ex)
+      //{
+      //  new ErrorLog(ex, sql);
+      //}
     }
   }
 }

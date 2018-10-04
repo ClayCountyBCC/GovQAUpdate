@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 
-namespace GovQAUpdate.Models
-{
+namespace GovQAUpdate
+{ 
+[JsonObject("Data")]
   public class GovQARecord
   {
 
@@ -29,7 +31,7 @@ namespace GovQAUpdate.Models
       return url;
     }
 
-    public static List<GovQARecord> GetRecorsToUpdate()
+    public static List<GovQARecord> GetRecordsToUpdate()
     {
       var records = new List<GovQARecord>();
 

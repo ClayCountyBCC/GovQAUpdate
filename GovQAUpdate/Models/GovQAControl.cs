@@ -2,8 +2,8 @@ using System;
 using System.Net.Http;
 using System.Collections.Generic;
 
-namespace GovQAUpdate.Models
-{
+namespace GovQAUpdate
+{ 
   public class GovQAControl
   {
     private AccessToken Token { get; set; }

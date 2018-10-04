@@ -47,7 +47,7 @@ namespace GovQAUpdate
         
         else
         {
-          // TODO: code to set headers
+          // TODO: code to set headers if already logged in
         }
         return whc;
       }
@@ -82,12 +82,12 @@ namespace GovQAUpdate
     }
 
 
-    public static string GetLoginURL(AccessToken token = null)
+    public string GetLoginURL(AccessToken token = null)
     {
       string activationKey = Properties.Resources.ActivationKey;
       string authKey = Properties.Resources.AuthKey;
 
-      return $"http://claycountyfl.webqaservices.com/PROD/api/MobileUserLoginAdmin?authKey={authKey}activationKey={activationKey}";
+      return $"http://claycountyfl.webqaservices.com/PROD/api/MobileUserLoginAdmin?authKey={authKey}&activationKey={activationKey}";
     }
 
 
@@ -95,7 +95,7 @@ namespace GovQAUpdate
     {
       var token = new AccessToken();
       
-      string json = Program.GetJSON(token.URL, token.Headers);
+      string json = Program.GetJSONAsync(token.URL, token.Headers).ToString();
       if (json != null)
       {
         return JsonConvert.DeserializeObject<AccessToken>(json);
