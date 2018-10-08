@@ -12,9 +12,8 @@ namespace GovQAUpdate
 
     public GovQAControl()
     {
-      Token = AccessToken.Authenticate();
+      Token = new AccessToken();
     }
-
 
     public static HttpClient GetClientRequest()
     {
@@ -30,6 +29,15 @@ namespace GovQAUpdate
     {
 
       return new List<GovQARecord>();
+    }
+
+    public string GetTokenLoginURL()
+    {
+      return Token.GetLoginURL();
+    }
+    public System.Net.WebHeaderCollection GetTokenHeaders()
+    {
+      return Token.Headers;
     }
   }
 }

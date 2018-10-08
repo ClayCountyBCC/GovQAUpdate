@@ -77,8 +77,7 @@ namespace GovQAUpdate
 
     public AccessToken()
     {
-      
-
+      Authenticate();
     }
 
 
@@ -91,11 +90,10 @@ namespace GovQAUpdate
     }
 
 
-    public static AccessToken Authenticate()
+    public AccessToken Authenticate()
     {
-      var token = new AccessToken();
       
-      string json = Program.GetJSONAsync(token.URL, token.Headers).ToString();
+      string json = Program.GetJSON(GetLoginURL(), Headers, (current_session_id.Length == 0 ? "POST": "GET")).ToString();
       if (json != null)
       {
         return JsonConvert.DeserializeObject<AccessToken>(json);

@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace GovQAUpdate
 {
@@ -23,8 +24,8 @@ namespace GovQAUpdate
 
     public static void Main()
     {
-      var token = new AccessToken();
-      var i =  GetJSONAsync(token.GetLoginURL(), token.Headers);
+      var controller = new GovQAControl();
+
       var records = new GovQARecord();
 
 
@@ -56,80 +57,40 @@ namespace GovQAUpdate
       // }
     }
 
-    public static Task<string> GetJSONAsync(string url, WebHeaderCollection hc = null)
+   
+    public static string GetJSON(string url, WebHeaderCollection hc = null, string apiMethod = "GET")
     {
+      
+      ServicePointManager.ReusePort = true;
+      ServicePointManager.Expect100Continue = true;
+      ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-
-      //ServicePointManager.ReusePort = true;
-      //ServicePointManager.Expect100Continue = true;
-      //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-      //var wr = HttpWebRequest.Create(url);
-      //wr.Timeout = 40000;
-      //wr.Proxy = null;
-      //wr.ContentType = "application/json";
-      //if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
-      //{
-      //  foreach (string key in hc.AllKeys)
-      //  {
-      //    wr.Headers.Add(key, hc[key]);
-      //  }
-      //}
-
-      // TODO: get content-type application/json and accept application/json headers get added
+      var wr = WebRequest.Create(url);
+      wr.Timeout = 40000;
+      wr.Method = apiMethod;
+      wr.Proxy = null;
+      wr.ContentType = "application/json";
+      if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
+      {
+        foreach (string key in hc.AllKeys)
+        {
+          wr.Headers.Add(key, hc[key]);
+        }
+      }
       string json = "";
-
       try
       {
-
-        using (var client = new HttpClient())
+        using (var response = wr.GetResponse())
         {
-          var request = new HttpRequestMessage()
+          if (response != null)
           {
-            RequestUri = new Uri(url),
-            Method = HttpMethod.Post,
-          };
-          if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
-          {
-            
-            foreach (string key in hc.AllKeys)
+            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
             {
-              request.Headers.Add(key, hc[key] + ",");
+              json = sr.ReadToEnd();
+              return json;
             }
           }
-
-          var task = client.SendAsync(request)
-              .ContinueWith((taskwithmsg) =>
-              {
-                var response = taskwithmsg.Result;
-
-                var jsonTask = response.Content.ReadAsStreamAsync();
-                jsonTask.Wait();
-                var jsonObject = jsonTask.Result;
-              });
-        };
-        //using (HttpClient client = new HttpClient())
-        //{
-        //  if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
-        //  {
-        //    foreach (string key in hc.AllKeys)
-        //    {
-        //      wr.Headers.Add(key, hc[key]);
-        //    }
-        //  };
-        //  // TODO: add headers to HttpClient without using HttpClient.DefaultRequestHeaders
-        // HttpResponseMessage response = await client.SendAsync(wr);
-        // HttpContent content = response.Content;
-        //  {
-        //    if (response != null)
-        //    {
-        //      using (StreamReader sr = new StreamReader(await content.ReadAsStringAsync()))
-        //      {
-        //        json = sr.ReadToEnd();
-        //        return json;
-        //      }
-        //    }
-        //  }
-
+        }
         return null;
       }
       catch (Exception ex)
@@ -139,21 +100,5 @@ namespace GovQAUpdate
       }
     }
 
-    //public enum CS_Type : int
-    //{
-    //  GovQA_ActivationKey = 1,
-    //  GovQA_AuthKey = 2,
-    //  GovQA_User = 3,
-    //  GovQA_Password = 4,
-    //  GovQA_Login = 5,
-    //  GovQA_Client_Secret = 6,
-    //  LOG = 7
-
-    //}
-
-    //public static string GetCS(CS_Type cs)
-    //{
-    //  return ConfigurationManager.ConnectionStrings[cs.ToString()].ConnectionString;
-    //}
   }
 }
