@@ -85,7 +85,7 @@ namespace GovQAUpdate
       string activationKey = Properties.Resources.ActivationKey;
       string authKey = Properties.Resources.AuthKey;
 
-      return $"http://claycountyfl.webqaservices.com/PROD/api/MobileUserLoginAdmin?";
+      return $"http://claycountyfl.webqaservices.com/PROD/api/MobileUserLoginAdmin?AuthKey=" + Properties.Resources.AuthKey + "&ActivationKey=" + Properties.Resources.ActivationKey;
     }
 
 

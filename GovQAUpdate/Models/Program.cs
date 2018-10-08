@@ -76,9 +76,11 @@ namespace GovQAUpdate
         foreach (string key in hc.AllKeys)
         {
           wr.Headers.Add(key, hc[key]);
+         
         }
       }
-      byte[] postArray = Encoding.ASCII.GetBytes("AuthKey=" + Properties.Resources.AuthKey + "&ActivationKey=" + Properties.Resources.ActivationKey + "&login=" + Properties.Resources.Prod_User + ",&password=" + Properties.Resources.Password);
+
+      byte[] postArray = Encoding.ASCII.GetBytes("{ \"login\": \"username\", \"password\": \"password\" }");
 
       wr.ContentLength = postArray.Length;
       var reqStream = wr.GetRequestStream();
