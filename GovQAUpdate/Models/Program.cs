@@ -58,18 +58,19 @@ namespace GovQAUpdate
     }
 
    
-    public static string GetJSON(string url, WebHeaderCollection hc = null, string apiMethod = "GET")
+    public static string GetJSON(string uri, WebHeaderCollection hc = null, string apiMethod = "GET")
     {
       
       ServicePointManager.ReusePort = true;
       ServicePointManager.Expect100Continue = true;
       ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-      var wr = WebRequest.Create(url);
+      var wr = WebRequest.Create(uri);
+      wr.ContentType = "application/json";
+      
       wr.Timeout = 40000;
       wr.Method = apiMethod;
       wr.Proxy = null;
-      wr.ContentType = "application/json";
       if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
       {
         foreach (string key in hc.AllKeys)
@@ -77,6 +78,15 @@ namespace GovQAUpdate
           wr.Headers.Add(key, hc[key]);
         }
       }
+      byte[] postArray = Encoding.ASCII.GetBytes("AuthKey=" + Properties.Resources.AuthKey + "&ActivationKey=" + Properties.Resources.ActivationKey + "&login=" + Properties.Resources.Prod_User + ",&password=" + Properties.Resources.Password);
+
+      wr.ContentLength = postArray.Length;
+      var reqStream = wr.GetRequestStream();
+      reqStream.Write(postArray, 0, postArray.Length);
+      reqStream.Close();
+
+
+
       string json = "";
       try
       {
@@ -95,7 +105,7 @@ namespace GovQAUpdate
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex, url + '\n' + json);
+        new ErrorLog(ex, uri + '\n' + json);
         return null;
       }
     }
