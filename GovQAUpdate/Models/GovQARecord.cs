@@ -7,15 +7,28 @@ using System.Threading.Tasks;
 using System.Net.Http;
 
 namespace GovQAUpdate
-{ 
-[JsonObject("Data")]
+{
+  [JsonObject("Data")]
   public class GovQARecord
   {
+    // Single beginning alpha, followed by six digits then the date format: MMDDYY (ex. W000123-042818))
+    public string reference_no { get; set; } = ""; 
 
-    public int issue_id { get; set; } = -1;
-    public string reference_no { get; set; } = ""; // Single beginning alpha, followed by six digits then the date format: MMDDYY (ex. W000123-042818))
-    public int service_request_status_id { get; set; } = -1; // 24 = "open"; 34 = "in progress"; 44 = "complete"
-    public string note { get; set; }
+    // numerical data after initial alpha in reference number this is used as the actual data GovQA expects for the update
+    public int issue_id { get; set; } = -1; 
+
+    public DateTime create_date { get; set; } = DateTime.MinValue;
+    public int service_request_status_id { get; set; } = -1; // 24 = "open"; 34 = "in progress"; 44 = "complete"; 45 = "Reopen
+
+    /* The following 5 properties could be used in future 
+     * updates to increase functionality of the application **/
+
+    //public string status_desc { get; set; } = "";
+    //public string note { get; set; } = "";
+    //public bool is_completed { get; set; } = false;
+    //public bool is_closed { get; set; } = false;
+    //public bool is_deleted { get; set; } = false; 
+
     
     
     public GovQARecord()

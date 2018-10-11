@@ -24,11 +24,14 @@ namespace GovQAUpdate
 
     public static void Main()
     {
-      var controller = new GovQAControl();
+      
+      GovQAControl controller = new GovQAControl();
 
-      var records = new GovQARecord();
-
-
+      controller.Update();
+      //if(controller.GetCurrentSessionId().Length == 0)
+      //{
+      //  controller = new GovQAControl();
+      //}
       // TODO: write program
 
       // While (ProgramShouldBeRunning)
@@ -58,36 +61,14 @@ namespace GovQAUpdate
     }
 
    
-    public static string GetJSON(string uri, WebHeaderCollection hc = null, string apiMethod = "GET")
+    public static string GetJSON(HttpWebRequest wr)
     {
       
       ServicePointManager.ReusePort = true;
       ServicePointManager.Expect100Continue = true;
       ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-      var wr = WebRequest.Create(uri);
-      wr.ContentType = "application/json";
-      
-      wr.Timeout = 40000;
-      wr.Method = apiMethod;
-      wr.Proxy = null;
-      if (hc != null) // Added this bit for the Fleet Complete Headers that are derived from the Authentication information.
-      {
-        foreach (string key in hc.AllKeys)
-        {
-          wr.Headers.Add(key, hc[key]);
-         
-        }
-      }
-
-      byte[] postArray = Encoding.ASCII.GetBytes("{ \"login\": \"username\", \"password\": \"password\" }");
-
-      wr.ContentLength = postArray.Length;
-      var reqStream = wr.GetRequestStream();
-      reqStream.Write(postArray, 0, postArray.Length);
-      reqStream.Close();
-
-
+      //var wr = CreateWebRequest(uri, hc, apiMethod);
 
       string json = "";
       try
@@ -107,10 +88,41 @@ namespace GovQAUpdate
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex, uri + '\n' + json);
+        new ErrorLog(ex, wr.RequestUri.ToString() + '\n' + json);
         return null;
       }
     }
 
+    public static HttpWebRequest CreateWebRequest(string uri, WebHeaderCollection hc, string apiMethod)
+    {
+
+      var wr = (HttpWebRequest)WebRequest.Create(uri);
+
+      wr.ContentType = "application/json";
+
+      wr.Accept = "application/jason";
+      wr.Timeout = 40000;
+      wr.Method = apiMethod;
+      wr.Proxy = null;
+
+      var postArray = new List<byte>().ToArray();
+
+
+      if (hc != null && hc.AllKeys.Contains("login"))
+      {
+        postArray = Encoding.ASCII.GetBytes("{ \"login\": \"" + Properties.Resources.Prod_User + 
+                                            "\", \"password\": \"" + Properties.Resources.Password + "\", }");
+
+        wr.ContentLength = postArray.Length;
+        var reqStream = wr.GetRequestStream();
+        reqStream.Write(postArray, 0, postArray.Length);
+        reqStream.Close();
+      }
+
+
+      return wr;
+    }
+
   }
+
 }

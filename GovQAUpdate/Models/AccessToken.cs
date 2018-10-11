@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace GovQAUpdate
 {
@@ -13,25 +14,26 @@ namespace GovQAUpdate
     //public bool IsMustChangePassword { get; set; }
     //public int LicenseExpiryDays { get; set; }
     //public string Name { get; set; }
+    private bool valid_token { get; set; } = false;
     public string current_session_id { get; set; } = "";
     public int staff_id { get; set; } = -1;
-    public string Version { get; set; } = "";
-
-    public string APIVersion
+    public string version { get; set; } = "";
+    public string api_version
     {
       get
       {
-        if (Version.Length == 0)
+        if (version.Length == 0)
         {
           return "";
         }
         else
         {
-          return Version.Substring(0, 5).Replace(".", "_");
+          return version.Substring(0, 5).Replace(".", "_");
         }
 
       }
     }
+
     public System.Net.WebHeaderCollection Headers
     {
       get
@@ -43,27 +45,19 @@ namespace GovQAUpdate
           whc.Add("password", Properties.Resources.Password);
           return whc;
         }
-
         else
         {
-          // TODO: code to set headers if already logged in
+          return new WebHeaderCollection();
         }
-        return whc;
       }
     }
-    public string URL
+
+    public string BaseURL
     {
       get
       {
-        var url = new StringBuilder("http://claycountyfl.webqaservices.com/PROD/api/");
-        if (current_session_id.Length == 0)
-        {
-          url.Append("MobileUserLoginAdmin?");
-        }
-        else
-        {
-          // TODO: switch statement to set api call to update or get GovQA data and set session id
-        }
+        var url = new StringBuilder("https://claycountyfl.webqaservices.com/PROD/api/");
+
         return url.ToString();
       }
       set
@@ -71,35 +65,89 @@ namespace GovQAUpdate
 
       }
     }
-
     // TODO: figure out a way to add the header from here
 
     public AccessToken()
     {
-      Authenticate();
+
     }
 
 
-    public string GetLoginURL(AccessToken token = null)
+    public string GetLoginURL()
     {
-      string activationKey = Properties.Resources.ActivationKey;
-      string authKey = Properties.Resources.AuthKey;
+      var LoginUri = new StringBuilder();
 
-      return $"http://claycountyfl.webqaservices.com/PROD/api/MobileUserLoginAdmin?AuthKey=" + Properties.Resources.AuthKey + "&ActivationKey=" + Properties.Resources.ActivationKey;
+      LoginUri.Append(BaseURL)
+         .Append("MobileUserLoginAdmin?")
+         .Append("authKey=" + Properties.Resources.AuthKey)
+         .Append("&activationKey=" + Properties.Resources.ActivationKey);
+
+      return LoginUri.ToString();
+
+      //return BaseURL + "MobileUserLoginAdmin?authKey=" + Properties.Resources.AuthKey + "&activationKey=" + Properties.Resources.ActivationKey;
     }
 
-
-    public AccessToken Authenticate()
+    public string GetSetCloseStatusURI()
     {
-      string json = Program.GetJSON(GetLoginURL(), Headers, (current_session_id.Length == 0 ? "POST" : "GET")).ToString();
+      var UpdateStatusURI = new StringBuilder();
+
+      UpdateStatusURI.Append(BaseURL)
+                     .Append("UploadRequestStatusAdmin?")
+                     .Append("activationKey=" + Properties.Resources.ActivationKey)
+                     .Append("&sessionId=" + current_session_id)
+                     .Append("&updated_by_staff_id=32")
+                     .Append("&new_service_request_status_id=44")
+                     .Append("&issue_id=");
+
+      return UpdateStatusURI.ToString();
+    }
+
+    public string GetUri(GovQARecord record = null, bool findRecord = false)
+    {
+      if (current_session_id.Length == 0)
+      {
+        return GetLoginURL();
+      }
+      else
+      {
+        if (findRecord)
+        {
+          GetGovQARecordURL(record);
+        }
+        //else
+        //{
+        //  GetSetCloseStatusURI(record.issue_id);
+        //}
+        return "";
+      }
+    }
+
+    public AccessToken Login()
+    {
+
+      string json = Program.GetJSON(Program.CreateWebRequest(GetUri(), Headers, (current_session_id.Length == 0 ? "POST" : "GET"))).ToString();
       if (json != null)
       {
-        return JsonConvert.DeserializeObject<AccessToken>(json);
+
+        var tokenObject = JsonConvert.DeserializeObject<AccessToken>(json);
+        tokenObject.valid_token = tokenObject.current_session_id.Length > 0;
+        return tokenObject;
       }
       else
       {
         return null;
       }
+    }
+
+    public string GetGovQARecordURL(GovQARecord record)
+    {
+
+      return "";
+    }
+
+    public bool IsTokenValid()
+    {
+      return valid_token;
     }
 
     //public HttpWebRequest CreateWebRequest(string uri, REQMETHOD reqMethod)
