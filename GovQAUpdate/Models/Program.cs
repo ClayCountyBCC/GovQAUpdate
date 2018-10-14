@@ -28,36 +28,7 @@ namespace GovQAUpdate
       GovQAControl controller = new GovQAControl();
 
       controller.Update();
-      //if(controller.GetCurrentSessionId().Length == 0)
-      //{
-      //  controller = new GovQAControl();
-      //}
-      // TODO: write program
 
-      // While (ProgramShouldBeRunning)
-      // {
-
-
-        // try
-        // {
-
-          // initialize GovQA object
-
-          // get list of completed PublicWorks && AnimalControl GovQA ids
-          // reduce list by checking against already completed ids need criteria to filter by
-
-          // update GovQA
-
-          // update ProcessedGovQAIds set GovQAClosedDate = current datetime
-
-          // wait     
-
-        // }
-        // catch(Exception ex)
-        // {
-            // write error 
-        // }
-      // }
     }
 
    

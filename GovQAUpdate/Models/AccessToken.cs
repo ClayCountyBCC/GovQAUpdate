@@ -14,7 +14,10 @@ namespace GovQAUpdate
     //public bool IsMustChangePassword { get; set; }
     //public int LicenseExpiryDays { get; set; }
     //public string Name { get; set; }
-    private bool valid_token { get; set; } = false;
+    public string BaseProductionURL => "https://claycountyfl.webqaservices.com/PROD/api/";
+    private string LoginURL => GetUri("login");
+
+    public bool valid_token { get; set; } = false;
     public string current_session_id { get; set; } = "";
     public int staff_id { get; set; } = -1;
     public string version { get; set; } = "";
@@ -34,6 +37,7 @@ namespace GovQAUpdate
       }
     }
 
+
     public System.Net.WebHeaderCollection Headers
     {
       get
@@ -52,19 +56,6 @@ namespace GovQAUpdate
       }
     }
 
-    public string BaseURL
-    {
-      get
-      {
-        var url = new StringBuilder("https://claycountyfl.webqaservices.com/PROD/api/");
-
-        return url.ToString();
-      }
-      set
-      {
-
-      }
-    }
     // TODO: figure out a way to add the header from here
 
     public AccessToken()
@@ -73,62 +64,65 @@ namespace GovQAUpdate
     }
 
 
-    public string GetLoginURL()
+    public string GetURIWithEndpoint(string endPoint)
     {
-      var LoginUri = new StringBuilder();
-
-      LoginUri.Append(BaseURL)
-         .Append("MobileUserLoginAdmin?")
-         .Append("authKey=" + Properties.Resources.AuthKey)
-         .Append("&activationKey=" + Properties.Resources.ActivationKey);
-
-      return LoginUri.ToString();
-
-      //return BaseURL + "MobileUserLoginAdmin?authKey=" + Properties.Resources.AuthKey + "&activationKey=" + Properties.Resources.ActivationKey;
+      return BaseProductionURL + endPoint + "?activationKey=" + Properties.Resources.ActivationKey;
     }
 
-    public string GetSetCloseStatusURI()
+    public string GetUri(string reason)
     {
-      var UpdateStatusURI = new StringBuilder();
+      string endPoint = "";
+      string parameters = "";
+      switch(reason)
+      {
+        case "login":
+          endPoint = "MobileUserLoginAdmin";
+          parameters += GetLoginParameters();
+          break;
+        case "update_note":
+          endPoint = "UploadRequestNoteAdmin";
+          parameters += GetSessionarameters();
+          parameters += GetUpdateNoteParameters();
+          break;
+        case "update_status":
+          endPoint = "UploadRequestStatusAdmin";
+          parameters += GetSessionarameters();
+          parameters += GetUpdateStatusParameters();
+          break;
+        case "validate_issue": // use to validate GovQARecord
+          endPoint = "MobileServiceRequestsAdmin";
+          parameters += GetSessionarameters();
+          break;
+      }
 
-      UpdateStatusURI.Append(BaseURL)
-                     .Append("UploadRequestStatusAdmin?")
-                     .Append("activationKey=" + Properties.Resources.ActivationKey)
-                     .Append("&sessionId=" + current_session_id)
-                     .Append("&updated_by_staff_id=32")
-                     .Append("&new_service_request_status_id=44")
-                     .Append("&issue_id=");
+      var uri = GetURIWithEndpoint(endPoint) + parameters;
 
-      return UpdateStatusURI.ToString();
+      return uri;
     }
 
-    public string GetUri(GovQARecord record = null, bool findRecord = false)
+    public string GetLoginParameters()
     {
-      if (current_session_id.Length == 0)
-      {
-        return GetLoginURL();
-      }
-      else
-      {
-        if (findRecord)
-        {
-          GetGovQARecordURL(record);
-        }
-        //else
-        //{
-        //  GetSetCloseStatusURI(record.issue_id);
-        //}
-        return "";
-      }
+      return "&authKey=" + Properties.Resources.AuthKey;
+    }
+
+    public string GetUpdateStatusParameters()
+    {
+      return "&updated_by_staff_id=32&new_service_request_status_id=44&issue_id=";
+    }
+    public string GetUpdateNoteParameters()
+    {
+      return "&updated_by_staff_id=32&issue_id=";
+    }
+    public string GetSessionarameters()
+    {
+      return "&sessionId=" + current_session_id;
     }
 
     public AccessToken Login()
     {
-
-      string json = Program.GetJSON(Program.CreateWebRequest(GetUri(), Headers, (current_session_id.Length == 0 ? "POST" : "GET"))).ToString();
+      string json = Program.GetJSON(Program.CreateWebRequest(LoginURL, Headers, "POST")).ToString();
       if (json != null)
       {
-
         var tokenObject = JsonConvert.DeserializeObject<AccessToken>(json);
         tokenObject.valid_token = tokenObject.current_session_id.Length > 0;
         return tokenObject;
@@ -139,16 +133,13 @@ namespace GovQAUpdate
       }
     }
 
-    public string GetGovQARecordURL(GovQARecord record)
+    public GovQARecord ValidateGoveQARecord(GovQARecord record)
     {
-
-      return "";
+      
+      return new GovQARecord();
     }
 
-    public bool IsTokenValid()
-    {
-      return valid_token;
-    }
+
 
     //public HttpWebRequest CreateWebRequest(string uri, REQMETHOD reqMethod)
     //{

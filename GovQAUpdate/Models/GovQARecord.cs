@@ -19,7 +19,7 @@ namespace GovQAUpdate
 
     public DateTime create_date { get; set; } = DateTime.MinValue;
     public int service_request_status_id { get; set; } = -1; // 24 = "open"; 34 = "in progress"; 44 = "complete"; 45 = "Reopen
-
+    public string note { get; set; }
     /* The following 5 properties could be used in future 
      * updates to increase functionality of the application **/
 
