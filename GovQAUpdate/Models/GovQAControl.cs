@@ -34,7 +34,7 @@ namespace GovQAUpdate
     public List<int> Update()
     {
       var records = new List<GovQARecord>();
-      records.Add(new GovQARecord() { issue_id = 129, note = "this is a new note" });
+      records.Add(new GovQARecord() { issue_id = 129 });
       var closedIssues = new List<int>();
       if (Token.valid_token)
       {
@@ -53,19 +53,6 @@ namespace GovQAUpdate
 
           }
 
-          if (r.note.Length > 0)
-          {
-            json = Program.GetJSON(Program.CreateWebRequest($@"{BaseNoteUpdateURI}{r.issue_id}&note={r.note}", Token.Headers, "GET")).ToString();
-            if (json != null)
-            {
-              var tokenObject = JsonConvert.DeserializeObject<string>(json);
-              if (tokenObject == "Success")
-              {
-                closedIssues.Add(r.issue_id * -1);
-              }
-
-            }
-          }
 
         }
       }
@@ -93,5 +80,6 @@ namespace GovQAUpdate
       }
       return false;
     }
+    
   }
 }
