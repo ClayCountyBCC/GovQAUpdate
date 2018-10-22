@@ -20,18 +20,18 @@ namespace GovQAUpdate
   class Program
   {
     public const int AppId = 00000;
-    public const int GovQAUpdate_application_staff_id = 1;
+    public const int GovQAUpdate_application_staff_id = 32;
+    public static bool is_debug = System.Diagnostics.Debugger.IsAttached;
 
     public static void Main()
     {
-      
+
       GovQAControl controller = new GovQAControl();
 
       controller.Update();
 
     }
 
-   
     public static string GetJSON(HttpWebRequest wr)
     {
       

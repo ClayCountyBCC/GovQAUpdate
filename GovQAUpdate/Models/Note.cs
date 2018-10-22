@@ -9,6 +9,7 @@ namespace GovQAUpdate
   public class Note
   {
     public string reference_number_id { get; set; }
+    // public DateTime note_added { get; set; }
     public string note { get; set; }
 
     public Note()

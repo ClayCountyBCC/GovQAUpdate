@@ -14,7 +14,9 @@ namespace GovQAUpdate
     //public bool IsMustChangePassword { get; set; }
     //public int LicenseExpiryDays { get; set; }
     //public string Name { get; set; }
-    public string BaseProductionURL => "https://claycountyfl.webqaservices.com/PROD/api/";
+    public string BaseProductionURL => Program.is_debug ? 
+                                      "https://claycountyfl.webqaservices.com/TEST/api/" : 
+                                      "https://claycountyfl.webqaservices.com/PROD/api/";
     private string LoginURL => GetUri("login");
 
     public bool valid_token { get; set; } = false;
@@ -37,14 +39,13 @@ namespace GovQAUpdate
       }
     }
 
-
     public System.Net.WebHeaderCollection Headers
     {
       get
       {
         var whc = new System.Net.WebHeaderCollection();
         if (current_session_id.Length == 0)
-        {
+        { 
           whc.Add("login", Properties.Resources.Prod_User);
           whc.Add("password", Properties.Resources.Password);
           return whc;
@@ -71,6 +72,8 @@ namespace GovQAUpdate
 
     public string GetUri(string reason)
     {
+
+      // TODO: Possibly need to set up url using resources file. These should not be in available to the public.
       string endPoint = "";
       string parameters = "";
       switch(reason)
@@ -90,7 +93,7 @@ namespace GovQAUpdate
           parameters += GetUpdateStatusParameters();
           break;
         case "validate_issue": // use to validate GovQARecord
-          endPoint = "MobileServiceRequestsAdmin";
+          endPoint = "MobileServiceRequestAdmin";
           parameters += GetSessionarameters();
           break;
       }

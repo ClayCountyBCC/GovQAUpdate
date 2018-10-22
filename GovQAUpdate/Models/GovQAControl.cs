@@ -33,53 +33,67 @@ namespace GovQAUpdate
 
     public List<int> Update()
     {
-      var records = new List<GovQARecord>();
-      records.Add(new GovQARecord() { issue_id = 129 });
-      var closedIssues = new List<int>();
+      var updatedIssues = new List<int>();
       if (Token.valid_token)
       {
-        foreach (var r in records)
+        foreach (var r in Records)
         {
-          if(!IsValidIssue(r)) continue;
+          if (IsValidIssue(r))
 
-          string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET")).ToString();
-          if (json != null)
           {
-            var tokenObject = JsonConvert.DeserializeObject<string>(json);
-            if (tokenObject == "Success")
-            {
-              closedIssues.Add(r.issue_id);
-            }
+            Console.WriteLine("No Error");
 
+            //string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET")).ToString();
+            //if (json != null)
+            //{
+            //  var tokenObject = JsonConvert.DeserializeObject<string>(json);
+            //  if (tokenObject == "Success")
+            //  {
+            //    updatedIssues.Add(r.issue_id);
+            //  }
+
+            //}
           }
-
-
+          else
+          {
+            Console.WriteLine("Error, most likely invalid reference_no");
+          }
         }
       }
-      return closedIssues;
+      return updatedIssues;
     }
 
     private void RenewToken()
     {
       Token = new AccessToken().Login();
-      Console.Write("Completed Login");
+      Console.WriteLine("Completed Login");
     }
 
     private bool IsValidIssue(GovQARecord r)
     {
-      var uri = BaseValidateIssueURI + "&r.reference_no=" + r.reference_no;
-      var json = Program.GetJSON(Program.CreateWebRequest(uri, Token.Headers, "GET")).ToString();
-      if (json != null)
+      var uri = BaseValidateIssueURI + "&referenceNo=" + r.reference_no;
+      try
       {
-        var tokenObject = JsonConvert.DeserializeObject<GovQARecord>(json);
-        if (tokenObject != null)
+        var json = Program.GetJSON(Program.CreateWebRequest(uri, Token.Headers, "GET")).ToString();
+        if (json != null)
         {
-          return true;
+          var tokenObject = JsonConvert.DeserializeObject<GovQARecord>(json);
+          if (tokenObject.reference_no == r.reference_no)
+          {
+            return true;
+          }
+
         }
+      }
+      catch (Exception ex)
+      {
+
+        // TODO: This is where we would set valid flag in DB to false;
 
       }
+
       return false;
     }
-    
+
   }
 }
