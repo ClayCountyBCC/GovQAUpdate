@@ -14,8 +14,8 @@ namespace GovQAUpdate
     //public bool IsMustChangePassword { get; set; }
     //public int LicenseExpiryDays { get; set; }
     //public string Name { get; set; }
-    public string BaseProductionURL => Program.is_debug ? 
-                                      "https://claycountyfl.webqaservices.com/TEST/api/" : 
+    public string BaseProductionURL => Program.is_debug ?
+                                      "https://claycountyfl.webqaservices.com/TEST/api/" :
                                       "https://claycountyfl.webqaservices.com/PROD/api/";
     private string LoginURL => GetUri("login");
 
@@ -45,7 +45,7 @@ namespace GovQAUpdate
       {
         var whc = new System.Net.WebHeaderCollection();
         if (current_session_id.Length == 0)
-        { 
+        {
           whc.Add("login", Properties.Resources.Prod_User);
           whc.Add("password", Properties.Resources.Password);
           return whc;
@@ -76,7 +76,7 @@ namespace GovQAUpdate
       // TODO: Possibly need to set up url using resources file. These should not be in available to the public.
       string endPoint = "";
       string parameters = "";
-      switch(reason)
+      switch (reason)
       {
         case "login":
           endPoint = "MobileUserLoginAdmin";
@@ -123,6 +123,7 @@ namespace GovQAUpdate
 
     public AccessToken Login()
     {
+      // TODO: create SetHeaders funtion; in GetJason/GetValidateJSON function calls, 2nd param should be: 'SetHeaders(string headerReason, List<key:value>})'
       string json = Program.GetJSON(Program.CreateWebRequest(LoginURL, Headers, "POST")).ToString();
       if (json != null)
       {
@@ -138,10 +139,10 @@ namespace GovQAUpdate
 
     public GovQARecord ValidateGoveQARecord(GovQARecord record)
     {
-      
+
       return new GovQARecord();
     }
-       
+
   }
 
 }

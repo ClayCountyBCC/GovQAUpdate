@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Dapper;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,23 +53,17 @@ namespace GovQAUpdate
 
     public static List<GovQARecord> GetRecordsToUpdate()
     {
-      var s = "\nOutput from GetRecordsToUpdate() Mode = ";
       var records = new List<GovQARecord>();
-      //records.Add(CreateTestRecord());
 
-      if (Program.is_debug)
-      {
-        s += "DEBUG";
-      }
-      else
-      {
+      var sql = @"
+      
+        
+      ";
+      records.Add(CreateTestRecord());
 
-       s += "RELEASE";
-          
-      }
-      Console.WriteLine(s);
       return records;
     }
+
     public static int LockGovQAIds()
     {
       // TODO: write code to lock the GovQA ids in table. return number of ids inserted into lock Table
@@ -82,23 +77,45 @@ namespace GovQAUpdate
       return -1;
     }
 
-    //private static GovQARecord CreateTestRecord()
-    //{
-    //  var testRecord = new GovQARecord();
-    //  var n = new Note()
-    //  {
-    //    note = "New Test Note; date: " + DateTime.Now.ToLongDateString(),
-    //    reference_number_id = "W000700-102018"
-    //  };
+    private static GovQARecord CreateTestRecord()
+    {
+      var testRecord = new GovQARecord();
+      var n = new Note()
+      {
+        note = "New Test Note; date: " + DateTime.Now.ToLongDateString(),
+        reference_number_id = "W000730-102410"
+        // reference_number_id = "W000730-102418"
 
-    //  testRecord = new GovQARecord()
-    //  {
-    //    reference_no = "W000700-102018",
-    //    service_request_status_id = 24,
-    //    note = n
-    //  };
+      };
 
-    //  return testRecord;
-    //}
+      testRecord = new GovQARecord()
+      {
+        reference_no = "W000730-102410",
+        // reference_number_id = "W000730-102418",
+
+        service_request_status_id = 24,
+        note = n
+      };
+
+      return testRecord;
+    }
+
+    public int SetReferenceNumberInvalid()
+    {
+
+      var param = new DynamicParameters();
+      param.Add("@reference_no", reference_no);
+
+      var sql = @"
+        USE ClayGovQA;
+
+        update GovQA_Reference_Table
+        SET valid = 0
+        WHERE REFERENCE_NO = @reference_no
+      
+      ";
+      // using connection here to connect to the DB and run the query
+      return -1;
+    }
   }
 }

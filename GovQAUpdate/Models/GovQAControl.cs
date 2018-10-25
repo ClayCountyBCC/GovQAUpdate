@@ -23,7 +23,7 @@ namespace GovQAUpdate
       {
         RenewToken();
 
-        if (Token.valid_token)
+        if (Token.valid_token && (Records == null || !Records.Any()))
         {
           Records = GovQARecord.GetRecordsToUpdate();
         }
@@ -43,7 +43,7 @@ namespace GovQAUpdate
           {
             Console.WriteLine("No Error");
 
-            //string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET")).ToString();
+            //string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET"));
             //if (json != null)
             //{
             //  var tokenObject = JsonConvert.DeserializeObject<string>(json);
@@ -56,7 +56,7 @@ namespace GovQAUpdate
           }
           else
           {
-            Console.WriteLine("Error, most likely invalid reference_no");
+            r.SetReferenceNumberInvalid();
           }
         }
       }
@@ -74,7 +74,10 @@ namespace GovQAUpdate
       var uri = BaseValidateIssueURI + "&referenceNo=" + r.reference_no;
       try
       {
-        var json = Program.GetJSON(Program.CreateWebRequest(uri, Token.Headers, "GET")).ToString();
+        string json = Program.GetValidateJSON(Program.CreateWebRequest(uri, Token.Headers, "GET"));
+
+        // TODO: create validateJSON function
+
         if (json != null)
         {
           var tokenObject = JsonConvert.DeserializeObject<GovQARecord>(json);
@@ -87,13 +90,16 @@ namespace GovQAUpdate
       }
       catch (Exception ex)
       {
-
+        var e = ex.GetBaseException();
+        Console.Write("Exception: ", ex.GetBaseException().ToString());
         // TODO: This is where we would set valid flag in DB to false;
-
+        Console.Write("End Exception");
       }
 
       return false;
     }
+
+
 
   }
 }

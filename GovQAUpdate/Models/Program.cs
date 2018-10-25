@@ -34,7 +34,7 @@ namespace GovQAUpdate
 
     public static string GetJSON(HttpWebRequest wr)
     {
-      
+
       ServicePointManager.ReusePort = true;
       ServicePointManager.Expect100Continue = true;
       ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -64,6 +64,47 @@ namespace GovQAUpdate
       }
     }
 
+    public static string GetValidateJSON(HttpWebRequest wr)
+    {
+
+      ServicePointManager.ReusePort = true;
+      ServicePointManager.Expect100Continue = true;
+      ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+      //var wr = CreateWebRequest(uri, hc, apiMethod);
+
+      string json = "";
+      try
+      {
+        using (var response = wr.GetResponse())
+        {
+          if (response != null)
+          {
+            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            {
+              json = sr.ReadToEnd();
+              return json;
+            }
+          }
+        }
+        return null;
+      }
+      catch (Exception ex)
+      {
+        var errorString = ((System.Net.HttpWebResponse)((System.Net.WebException)ex).Response).StatusDescription;
+        if (errorString.ToLower() == "an unhandled exception was thrown by web api controller.")
+        {
+          // TODO: add code to invalidate this GovQA reference_no
+          Console.Write("This is where I set the valid = 0");
+        }
+        else
+        {
+          new ErrorLog(ex, wr.RequestUri.ToString() + '\n' + json);
+        }
+        return null;
+      }
+    }
+
     public static HttpWebRequest CreateWebRequest(string uri, WebHeaderCollection hc, string apiMethod)
     {
 
@@ -81,7 +122,7 @@ namespace GovQAUpdate
 
       if (hc != null && hc.AllKeys.Contains("login"))
       {
-        postArray = Encoding.ASCII.GetBytes("{ \"login\": \"" + Properties.Resources.Prod_User + 
+        postArray = Encoding.ASCII.GetBytes("{ \"login\": \"" + Properties.Resources.Prod_User +
                                             "\", \"password\": \"" + Properties.Resources.Password + "\", }");
 
         wr.ContentLength = postArray.Length;
