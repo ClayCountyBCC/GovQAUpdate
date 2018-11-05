@@ -91,7 +91,7 @@ namespace GovQAUpdate
       }
       catch (Exception ex)
       {
-        var errorString = ((System.Net.HttpWebResponse)((System.Net.WebException)ex).Response).StatusDescription;
+        var errorString = "an unhandled exception was thrown by web api controller.";
         if (errorString.ToLower() == "an unhandled exception was thrown by web api controller.")
         {
           // TODO: add code to invalidate this GovQA reference_no
@@ -107,32 +107,109 @@ namespace GovQAUpdate
 
     public static HttpWebRequest CreateWebRequest(string uri, WebHeaderCollection hc, string apiMethod)
     {
-
-      var wr = (HttpWebRequest)WebRequest.Create(uri);
-
-      wr.ContentType = "application/json";
-
-      wr.Accept = "application/jason";
-      wr.Timeout = 40000;
-      wr.Method = apiMethod;
-      wr.Proxy = null;
-
-      var postArray = new List<byte>().ToArray();
-
-
-      if (hc != null && hc.AllKeys.Contains("login"))
+      try
       {
-        postArray = Encoding.ASCII.GetBytes("{ \"login\": \"" + Properties.Resources.Prod_User +
-                                            "\", \"password\": \"" + Properties.Resources.Password + "\", }");
+        var wr = (HttpWebRequest)WebRequest.Create(uri);
 
-        wr.ContentLength = postArray.Length;
-        var reqStream = wr.GetRequestStream();
-        reqStream.Write(postArray, 0, postArray.Length);
-        reqStream.Close();
+        wr.ContentType = "application/json";
+
+        wr.Accept = "application/jason";
+        wr.Timeout = 40000;
+        wr.Method = apiMethod;
+        wr.Proxy = null;
+
+        var postArray = new List<byte>().ToArray();
+
+
+        if (hc != null && hc.AllKeys.Contains("login"))
+        {
+          postArray = Encoding.ASCII.GetBytes("{ \"login\": \"" + Properties.Resources.Prod_User +
+                                              "\", \"password\": \"" + Properties.Resources.Password + "\", }");
+
+          wr.ContentLength = postArray.Length;
+          var reqStream = wr.GetRequestStream();
+          reqStream.Write(postArray, 0, postArray.Length);
+          reqStream.Close();
+        }
+
+
+        return wr;
       }
 
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.ToString());
+        return null;
+      }
+    }
 
-      return wr;
+    public static List<T> Get_Data<T>(string query, string cs)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        {
+          return (List<T>)db.Query<T>(query);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return null;
+      }
+    }
+
+    public static List<T> Get_Data<T>(string query, DynamicParameters dbA, string cs)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        {
+          return (List<T>)db.Query<T>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return null;
+      }
+    }
+
+    public static int Exec_Query(string query, DynamicParameters dbA, string cs)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        {
+          return db.ExecuteScalar<int>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return -1;
+      }
+    }
+
+    public static int Exec_Scalar(string query, DynamicParameters dbA, string cs)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        {
+          return db.ExecuteScalar<int>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return -1;
+      }
+    }
+
+    public static string GetCS(string cs)
+    {
+      return cs;
     }
 
   }

@@ -8,13 +8,14 @@ namespace GovQAUpdate
 {
   public class Note
   {
-    public string reference_number_id { get; set; }
+    public string reference_number_id { get; set; } = "";
+    public int note_id { get; set; } = -1;
     // public DateTime note_added { get; set; }
-    public string note { get; set; }
+    public string note_text { get; set; } = "";
 
     public Note()
     {
-
+      
     }
 
 

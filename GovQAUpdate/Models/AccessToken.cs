@@ -14,8 +14,8 @@ namespace GovQAUpdate
     //public bool IsMustChangePassword { get; set; }
     //public int LicenseExpiryDays { get; set; }
     //public string Name { get; set; }
-    public string BaseProductionURL => Program.is_debug ?
-                                      "https://claycountyfl.webqaservices.com/TEST/api/" :
+    public string BaseProductionURL => // Program.is_debug ?
+    //                                  "https://claycountyfl.webqaservices.com/TEST/api/" :
                                       "https://claycountyfl.webqaservices.com/PROD/api/";
     private string LoginURL => GetUri("login");
 
@@ -123,7 +123,7 @@ namespace GovQAUpdate
 
     public AccessToken Login()
     {
-      // TODO: create SetHeaders funtion; in GetJason/GetValidateJSON function calls, 2nd param should be: 'SetHeaders(string headerReason, List<key:value>})'
+      // TODO: create SetHeaders funtion; in GetJSON/GetValidateJSON function calls, 2nd param should be: 'SetHeaders(string headerReason, List<key:value>})'
       string json = Program.GetJSON(Program.CreateWebRequest(LoginURL, Headers, "POST")).ToString();
       if (json != null)
       {

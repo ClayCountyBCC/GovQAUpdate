@@ -34,30 +34,32 @@ namespace GovQAUpdate
     public List<int> Update()
     {
       var updatedIssues = new List<int>();
+
+
       if (Token.valid_token)
       {
         foreach (var r in Records)
         {
-          if (IsValidIssue(r))
+          //if (IsValidIssue(r))
 
-          {
-            Console.WriteLine("No Error");
+          //{
+          //  Console.WriteLine("No Error");
 
-            //string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET"));
-            //if (json != null)
-            //{
-            //  var tokenObject = JsonConvert.DeserializeObject<string>(json);
-            //  if (tokenObject == "Success")
-            //  {
-            //    updatedIssues.Add(r.issue_id);
-            //  }
+          //  string json = Program.GetJSON(Program.CreateWebRequest(BaseStatusUpdateURI + r.issue_id, Token.Headers, "GET"));
+          //  if (json != null)
+          //  {
+          //    var tokenObject = JsonConvert.DeserializeObject<string>(json);
+          //    if (tokenObject == "Success")
+          //    {
+          //      updatedIssues.Add(r.issue_id);
+          //    }
 
-            //}
-          }
-          else
-          {
-            r.SetReferenceNumberInvalid();
-          }
+          //  }
+          //}
+          //else
+          //{
+          //  r.SetReferenceNumberInvalid();
+          //}
         }
       }
       return updatedIssues;
@@ -66,7 +68,6 @@ namespace GovQAUpdate
     private void RenewToken()
     {
       Token = new AccessToken().Login();
-      Console.WriteLine("Completed Login");
     }
 
     private bool IsValidIssue(GovQARecord r)
@@ -75,8 +76,6 @@ namespace GovQAUpdate
       try
       {
         string json = Program.GetValidateJSON(Program.CreateWebRequest(uri, Token.Headers, "GET"));
-
-        // TODO: create validateJSON function
 
         if (json != null)
         {
@@ -90,10 +89,10 @@ namespace GovQAUpdate
       }
       catch (Exception ex)
       {
-        var e = ex.GetBaseException();
-        Console.Write("Exception: ", ex.GetBaseException().ToString());
-        // TODO: This is where we would set valid flag in DB to false;
-        Console.Write("End Exception");
+        Token.valid_token = false;
+        
+        // TODO: here we call function to email notification of invalid ref #
+
       }
 
       return false;
