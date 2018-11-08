@@ -28,7 +28,18 @@ namespace GovQAUpdate
 
       GovQAControl controller = new GovQAControl();
 
-      controller.Update();
+      // Step 6: Update
+      if (controller.Update())
+      {
+        return;
+      }
+      else
+      {
+        // TODO: set up email to inform there is an issue updating the status on some reference numbers
+        Console.WriteLine("Pause Statement");
+        }
+
+
 
     }
 
@@ -92,15 +103,11 @@ namespace GovQAUpdate
       catch (Exception ex)
       {
         var errorString = "an unhandled exception was thrown by web api controller.";
-        if (errorString.ToLower() == "an unhandled exception was thrown by web api controller.")
-        {
-          // TODO: add code to invalidate this GovQA reference_no
-          Console.Write("This is where I set the valid = 0");
-        }
-        else
+        if (errorString.ToLower() != "an unhandled exception was thrown by web api controller.")
         {
           new ErrorLog(ex, wr.RequestUri.ToString() + '\n' + json);
         }
+
         return null;
       }
     }
@@ -163,7 +170,7 @@ namespace GovQAUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        using (IDbConnection db = new SqlConnection(cs))
         {
           return (List<T>)db.Query<T>(query, dbA);
         }
@@ -179,9 +186,25 @@ namespace GovQAUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        using (IDbConnection db = new SqlConnection(cs))
         {
           return db.ExecuteScalar<int>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return -1;
+      }
+    }
+
+    public static int Exec_Query(string query, string cs)
+    {
+      try
+      {
+        using (IDbConnection db = new SqlConnection(cs))
+        {
+          return db.Execute(query);
         }
       }
       catch (Exception ex)
@@ -195,7 +218,7 @@ namespace GovQAUpdate
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(GetCS(cs)))
+        using (IDbConnection db = new SqlConnection(cs))
         {
           return db.ExecuteScalar<int>(query, dbA);
         }
