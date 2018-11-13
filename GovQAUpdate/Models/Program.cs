@@ -19,9 +19,9 @@ namespace GovQAUpdate
 {
   class Program
   {
-    public const int AppId = 00000;
+    public const int AppId = 20037;
     public const int GovQAUpdate_application_staff_id = 32;
-    public static bool is_debug = System.Diagnostics.Debugger.IsAttached;
+    // public static bool is_debug = System.Diagnostics.Debugger.IsAttached;
 
     public static void Main()
     {

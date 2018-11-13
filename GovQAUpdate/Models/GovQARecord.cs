@@ -230,8 +230,6 @@ namespace GovQAUpdate
 
       }
 
-
-
       return badEntries;
     }
 

@@ -112,6 +112,11 @@ namespace GovQAUpdate
             }
 
           }
+          else
+          {
+            new ErrorLog("GovQA reference number " + id + "status not updated in GovQA", id + " status was not updated", "", "", "");
+
+          }
 
         }
       }
@@ -193,7 +198,7 @@ namespace GovQAUpdate
         }
         catch (Exception ex)
         {
-          // Nothing to be done. We don't care if the issue is not updated in the closed list, we will notify after all are tried
+          new ErrorLog("GovQA reference number " + id + " did not correctly update in GovQA_Closed_Reference_Numbers table", id + " status was not updated", "", "", "");
         }
 
       }
