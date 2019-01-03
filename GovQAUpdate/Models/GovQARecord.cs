@@ -238,66 +238,68 @@ namespace GovQAUpdate
       // TODO: write code to update the date and time GovQA ticket is closed successfully
       var query = @"
   
-        USE ClayGovQA;
-
-        WITH AllReferenceNumbers AS (
-          SELECT 
-            activity_identity,
-            [activity_no] animal_services_id
-            ,[activity_seq]
-            ,[extra5]
-            ,activity_date
-            ,userid
-          FROM [Animal].[SYSADM].[activity]
-          WHERE extra5 LIKE 
-          '[WUP][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]-[0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]')
-          , IncompleteActivityNumbers AS (
-          SELECT 
-            AN.activity_identity,
-            AN.[activity_no] animal_services_id
-            ,AN.[activity_seq]
-            ,AN.[extra5]
-            ,AN.activity_date
-            ,AN.userid
-          FROM [Animal].[SYSADM].[activity] AN
-          WHERE AN.activity_stat NOT IN ('COMPLETED'))
-          ,all_pubworks_reference_numbers AS (
-          SELECT
-            N.ID NoteID, 
-            N.cscID public_works_id, 
-            U.Name username,
-            N.Note,
-            CASE WHEN C.CompletionDate IS NOT NULL THEN 1 ELSE 0 END Completed
-          FROM PubWorks.dbo.cscAction N
-          INNER JOIN PubWorks.dbo.csc C ON N.cscID = C.ID
-          INNER JOIN PubWorks.dbo.usr U ON N.UserID = U.ID
-          WHERE 
-            N.Note LIKE
-            '[WUP][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]-[0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]')
-
-        -- UNCOMMENT NEXT TWO LINES
-        INSERT INTO GovQA_Closed_Reference_Numbers
-        (data_id, reference_number)
-
-        SELECT * FROM (
-            SELECT   
-              RT.animal_services_id data_id,
-              RT.reference_number 
-            FROM GovQA_Reference_Number_Table RT
-            INNER JOIN  AllReferenceNumbers A ON A.animal_services_id  + '-' + CAST(ACTIVITY_SEQ AS VARCHAR(4)) = RT.animal_services_id
-            WHERE A.animal_services_id NOT IN (SELECT animal_services_id FROM IncompleteActivityNumbers)
+      USE ClayGovQA;
+      WITH AllReferenceNumbers AS (
+        SELECT 
+          activity_identity,
+          [activity_no] animal_services_id
+          ,[activity_seq]
+          ,[extra5]
+          ,activity_date
+          ,userid
+        FROM [Animal].[SYSADM].[activity]
+        WHERE extra5 LIKE 
+        '[WUP][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]-[0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]'
+      ), IncompleteActivityNumbers AS (
+        SELECT 
+          AN.activity_identity,
+          AN.[activity_no] animal_services_id
+          ,AN.[activity_seq]
+          ,AN.[extra5]
+          ,AN.activity_date
+          ,AN.userid
+        FROM [Animal].[SYSADM].[activity] AN
+        WHERE AN.activity_stat NOT IN ('COMPLETED')
+      ),all_pubworks_reference_numbers AS (
+        SELECT
+          N.ID NoteID, 
+          N.cscID public_works_id, 
+          U.Name username,
+          N.Note,
+          CASE WHEN C.CompletionDate IS NOT NULL THEN 1 ELSE 0 END Completed
+        FROM PubWorks.dbo.cscAction N
+        INNER JOIN PubWorks.dbo.csc C ON N.cscID = C.ID
+        INNER JOIN PubWorks.dbo.usr U ON N.UserID = U.ID
+        WHERE 
+          N.Note LIKE
+          '%[WUP][0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]-[0123456789][0123456789][0123456789][0123456789][0123456789][0123456789]%'
+      ), ReadyToBeClosed AS (
+        SELECT   
+          RT.animal_services_id data_id,
+          RT.reference_number 
+        FROM GovQA_Reference_Number_Table RT
+        INNER JOIN  AllReferenceNumbers A ON A.animal_services_id  + '-' + CAST(ACTIVITY_SEQ AS VARCHAR(4)) = RT.animal_services_id
+        WHERE A.animal_services_id NOT IN (SELECT animal_services_id FROM IncompleteActivityNumbers)           
     
-            UNION
-
-            SELECT 
-              'P' + CAST(A.public_works_id AS VARCHAR(10)), 
-              RT.reference_number 
-            FROM 
-              GovQA_Reference_Number_Table RT
-            LEFT OUTER JOIN all_pubworks_reference_numbers A ON A.public_works_id = RT.public_works_id
-            WHERE A.public_works_id IS NOT NULL
-              AND COMPLETED = 1 ) AS TMP
-            ORDER BY LEFT(reference_number,7)
+        UNION
+        SELECT 
+          'P' + CAST(A.public_works_id AS VARCHAR(10)), 
+          RT.reference_number 
+        FROM 
+          GovQA_Reference_Number_Table RT
+        LEFT OUTER JOIN all_pubworks_reference_numbers A ON A.public_works_id = RT.public_works_id
+        WHERE 
+          A.public_works_id IS NOT NULL
+          AND COMPLETED = 1 
+      )
+      INSERT INTO GovQA_Closed_Reference_Numbers (data_id, reference_number)
+      SELECT
+        R.data_id,
+        R.reference_number
+      FROM ReadyToBeClosed R
+      LEFT OUTER JOIN GovQA_Closed_Reference_Numbers C ON R.data_id = C.data_id
+      WHERE C.data_id IS NULL
+      
       ";
            
       try
@@ -325,7 +327,7 @@ namespace GovQAUpdate
         GovQA_Closed_Reference_Numbers C 
         LEFT OUTER JOIN GovQA_Reference_Number_Table R ON C.reference_number = R.reference_number
         WHERE C.[status] != 'CLOSED'
-           OR C.[status] IS NULL      ";
+           OR C.[status] IS NULL";
 
       try
       {
